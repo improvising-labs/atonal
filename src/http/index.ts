@@ -10,16 +10,22 @@ declare module 'fastify' {
   }
 }
 
+export type CorsOptions = FastifyCorsOptions | boolean
+export type CookieOptions = FastifyCookieOptions | boolean
+
 export interface AtonalConfig extends Omit<FastifyServerOptions, 'ajv'> {
-  cors?: FastifyCorsOptions | boolean
-  cookie?: FastifyCookieOptions | boolean
+  cors?: CorsOptions
+  cookie?: CookieOptions
 }
 
 export interface Atonal {
   fast: FastifyInstance
-  use: FastifyInstance['register']
-  addHook: FastifyInstance['addHook']
   listen: FastifyInstance['listen']
+  use: FastifyInstance['register']
+  decorateRequest: FastifyInstance['decorateRequest']
+  decorateResponse: FastifyInstance['decorateReply']
+  addHook: FastifyInstance['addHook']
+  addSchema: FastifyInstance['addSchema']
 }
 
 export const useAtonal = ({
@@ -68,9 +74,12 @@ export const useAtonal = ({
 
   const atonal: Atonal = {
     fast,
-    use: fast.register.bind(fast),
-    addHook: fast.addHook.bind(fast),
     listen: fast.listen.bind(fast),
+    use: fast.register.bind(fast),
+    decorateRequest: fast.decorateRequest.bind(fast),
+    decorateResponse: fast.decorateReply.bind(fast),
+    addHook: fast.addHook.bind(fast),
+    addSchema: fast.addSchema.bind(fast),
   }
 
   return atonal
