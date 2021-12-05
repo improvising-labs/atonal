@@ -39,8 +39,8 @@ export interface Route {
 
 export interface SchemaRoute<S extends Schema = any> {
   schema?: S
-  middlewares?: Middleware<S>[]
   middlewareTrigger?: MiddlewareTrigger
+  middlewares?: Middleware[]
   handler: Handler<S>
 }
 
