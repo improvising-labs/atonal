@@ -1,6 +1,6 @@
 import Ajv from 'ajv'
 
-const addFormats = (ajv: Ajv.Ajv) => {
+const extendAjv = (ajv: Ajv.Ajv) => {
   ajv.addFormat('boolean', {
     type: 'string',
     validate: /^(true|false|0|1)$/,
@@ -27,4 +27,4 @@ const addFormats = (ajv: Ajv.Ajv) => {
   })
 }
 
-export default addFormats
+export default extendAjv

@@ -1,7 +1,7 @@
 import fastify, { FastifyInstance, FastifyServerOptions } from 'fastify'
 import fastifyCookie, { FastifyCookieOptions } from 'fastify-cookie'
 import fastifyCors, { FastifyCorsOptions } from 'fastify-cors'
-import addFormats from './validation/add-formats'
+import extendAjv from './validation/ajv'
 
 declare module 'fastify' {
   interface RequestState {}
@@ -39,7 +39,7 @@ export const useAtonal = ({
     caseSensitive: true,
     ignoreTrailingSlash: true,
     ajv: {
-      plugins: [addFormats],
+      plugins: [extendAjv],
     },
     ...opts,
   })
