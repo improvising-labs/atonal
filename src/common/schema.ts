@@ -561,7 +561,7 @@ export class TypeBuilder {
   /** `STANDARD` Creates a literal schema. Supports `string | number | boolean` values. */
   Literal<T extends TValue>(value: T, options?: CustomOptions): TLiteral<T>
   Literal<T extends TValue>(
-    value: T[],
+    value: T[] | readonly T[],
     options?: CustomOptions,
   ): TUnion<TLiteral<T>[]>
   Literal<T extends TValue>(

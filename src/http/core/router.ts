@@ -50,11 +50,10 @@ export interface RouterOptions {
 }
 
 export class Router {
-  prefix: string
-  middlewares: Middleware[]
-
-  private routes: Route[]
-  private used: [string, Router][]
+  private readonly prefix: string
+  private readonly middlewares: Middleware[]
+  private readonly routes: Route[]
+  private readonly used: [string, Router][]
 
   constructor(opts: RouterOptions) {
     this.prefix = opts.prefix ?? '/'
