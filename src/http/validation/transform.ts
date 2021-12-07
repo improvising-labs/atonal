@@ -1,5 +1,5 @@
 export type TypeMapping<S extends Record<string, unknown>> = {
-  [key in keyof S]?: (...args: any) => any
+  [key in keyof S]?: (x: S[key]) => unknown
 }
 
 export type TypeTransformed<
