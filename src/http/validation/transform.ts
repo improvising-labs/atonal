@@ -1,14 +1,16 @@
 export type TypeMapping<S extends Record<string, unknown>> = {
-  [key in keyof S]?: (x: S[key]) => unknown
+  [key in keyof S]?: (x: NonNullable<S[key]>) => unknown
 }
 
 export type TypeTransformed<
   S extends Record<string, unknown>,
   T extends TypeMapping<S>,
 > = {
-  [key in keyof S]: T[key] extends (...args: any) => any
+  [key in keyof S]: T[key] extends (x: NonNullable<S[key]>) => unknown
     ? S[key] extends undefined
       ? ReturnType<T[key]> | undefined
+      : S[key] extends null
+      ? ReturnType<T[key]> | null
       : ReturnType<T[key]>
     : S[key]
 }
