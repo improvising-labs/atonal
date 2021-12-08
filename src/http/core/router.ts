@@ -32,8 +32,8 @@ export interface Route {
   url: string
   method: HTTPMethods
   schema?: Schema
-  middlewares?: Middleware[]
   middlewareTrigger?: MiddlewareTrigger
+  middlewares?: Middleware[]
   handler: Handler<Schema>
 }
 
@@ -46,6 +46,10 @@ export interface SchemaRoute<S extends Schema = any> {
 
 export interface RouterOptions {
   prefix?: string
+  middlewares?: Middleware[]
+}
+
+export interface RouterCompileOptions {
   middlewares?: Middleware[]
 }
 
@@ -67,30 +71,47 @@ export class Router {
     path: string,
     route: SchemaRoute<S>,
   ) {
-    const {
-      schema,
-      middlewares = [],
-      middlewareTrigger = 'preValidation',
-      handler,
-    } = route
+    const { schema, middlewareTrigger, middlewares, handler } = route
 
     this.routes.push({
       url: resolvePaths(this.prefix, path),
       method,
       schema,
-      [middlewareTrigger]: [...this.middlewares, ...middlewares],
+      middlewareTrigger,
+      middlewares,
       handler,
     })
   }
 
   compile() {
-    return usePlugin((instance, _, done) => {
+    return usePlugin<RouterCompileOptions>((instance, opts, done) => {
+      const { middlewares: extendedMiddlewares = [] } = opts
+      const currentMiddlewares = [...extendedMiddlewares, ...this.middlewares]
+
       for (const route of this.routes) {
-        instance.route(route)
+        const {
+          url,
+          method,
+          schema,
+          middlewareTrigger = 'preValidation',
+          middlewares = [],
+          handler,
+        } = route
+
+        instance.route({
+          url,
+          method,
+          schema,
+          [middlewareTrigger]: [...currentMiddlewares, ...middlewares],
+          handler,
+        })
       }
 
       for (const [prefix, router] of this.used) {
-        instance.register(router.compile(), { prefix })
+        instance.register(router.compile(), {
+          prefix,
+          middlewares: currentMiddlewares,
+        })
       }
 
       done()
