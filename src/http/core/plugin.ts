@@ -1,5 +1,10 @@
-import { FastifyPluginAsync, FastifyPluginCallback } from 'fastify'
+import {
+  FastifyPluginAsync,
+  FastifyPluginCallback,
+  FastifyRegisterOptions,
+} from 'fastify'
 
+export type PluginRegisterOptions<Options> = FastifyRegisterOptions<Options>
 export type PluginOptions = Record<string, any>
 export type Plugin<T extends PluginOptions = PluginOptions> =
   | FastifyPluginAsync<T>

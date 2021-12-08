@@ -1,6 +1,8 @@
 import fastify, { FastifyInstance, FastifyServerOptions } from 'fastify'
 import fastifyCookie, { FastifyCookieOptions } from 'fastify-cookie'
 import fastifyCors, { FastifyCorsOptions } from 'fastify-cors'
+import { Plugin, PluginOptions, PluginRegisterOptions } from './core/plugin'
+import { Router, RouterRegisterOptions } from './core/router'
 import extendAjv from './validation/ajv'
 
 declare module 'fastify' {
@@ -18,10 +20,18 @@ export interface AtonalConfig extends Omit<FastifyServerOptions, 'ajv'> {
   cookie?: CookieOptions
 }
 
+export interface AtonalUseFn<T = void> {
+  <Options extends PluginOptions>(
+    plugin: Plugin<Options>,
+    opts?: PluginRegisterOptions<Options>,
+  ): T
+  (router: Router, opts?: PluginRegisterOptions<RouterRegisterOptions>): T
+}
+
 export interface Atonal {
   fast: FastifyInstance
   listen: FastifyInstance['listen']
-  use: FastifyInstance['register']
+  use: AtonalUseFn
   decorateRequest: FastifyInstance['decorateRequest']
   decorateResponse: FastifyInstance['decorateReply']
   addHook: FastifyInstance['addHook']
@@ -72,10 +82,21 @@ export const useAtonal = ({
     next()
   })
 
+  const use: AtonalUseFn = (
+    obj: Plugin | Router,
+    opts?: PluginRegisterOptions<PluginOptions | RouterRegisterOptions>,
+  ) => {
+    if (obj instanceof Router) {
+      fast.register(obj.compile(), opts)
+    } else {
+      fast.register(obj, opts)
+    }
+  }
+
   const atonal: Atonal = {
     fast,
     listen: fast.listen.bind(fast),
-    use: fast.register.bind(fast),
+    use,
     decorateRequest: fast.decorateRequest.bind(fast),
     decorateResponse: fast.decorateReply.bind(fast),
     addHook: fast.addHook.bind(fast),

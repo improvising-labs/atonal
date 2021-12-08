@@ -49,7 +49,7 @@ export interface RouterOptions {
   middlewares?: Middleware[]
 }
 
-export interface RouterCompileOptions {
+export interface RouterRegisterOptions {
   middlewares?: Middleware[]
 }
 
@@ -59,7 +59,7 @@ export class Router {
   private readonly routes: Route[]
   private readonly used: [string, Router][]
 
-  constructor(opts: RouterOptions) {
+  constructor(opts: RouterOptions = {}) {
     this.prefix = opts.prefix ?? '/'
     this.middlewares = opts.middlewares ?? []
     this.routes = []
@@ -84,7 +84,7 @@ export class Router {
   }
 
   compile() {
-    return usePlugin<RouterCompileOptions>((instance, opts, done) => {
+    return usePlugin<RouterRegisterOptions>((instance, opts, done) => {
       const { middlewares: extendedMiddlewares = [] } = opts
       const currentMiddlewares = [...extendedMiddlewares, ...this.middlewares]
 
