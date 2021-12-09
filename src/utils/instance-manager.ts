@@ -30,3 +30,7 @@ export const useInstance = <T>(name: string, instance?: T): InstanceRef<T> => {
     },
   }
 }
+
+export const getInstance = <T>(name: string) => {
+  return InstanceManager.get<T>(name)
+}
