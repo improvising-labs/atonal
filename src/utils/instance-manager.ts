@@ -22,6 +22,9 @@ export const useInstance = <T>(name: string, instance?: T): InstanceRef<T> => {
   }
 
   return {
+    set instance(newInstance: T) {
+      InstanceManager.put(name, newInstance)
+    },
     get instance() {
       return InstanceManager.get<T>(name)
     },
