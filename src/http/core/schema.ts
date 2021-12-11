@@ -1,4 +1,5 @@
 import { FastifySchema } from 'fastify'
+import { RouteGenericInterface } from 'fastify/types/route'
 import { Static } from '../../common/schema'
 
 export type Maybe<T, P> = [T] extends [never] ? P : T
@@ -13,4 +14,4 @@ export type RouteSchemaInterface<S extends RouteSchema> =
         Headers: Maybe<Static<S['headers']>, unknown>
         Reply: Maybe<Static<S['response']>, unknown>
       }
-    : never
+    : RouteGenericInterface
