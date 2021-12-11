@@ -12,7 +12,7 @@ import { RouteSchema, RouteSchemaInterface } from './schema'
 
 export type MiddlewareTrigger = 'preValidation' | 'preHandler'
 
-export type Handler<S extends RouteSchema = undefined> = FastifyRouteHandler<
+export type Handler<S extends RouteSchema = RouteSchema> = FastifyRouteHandler<
   RouteSchemaInterface<S>,
   RawServerDefault,
   RawRequestDefaultExpression<RawServerDefault>,
