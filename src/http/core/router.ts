@@ -12,26 +12,26 @@ import { RouteSchema, RouteSchemaInterface } from './schema'
 
 export type MiddlewareTrigger = 'preValidation' | 'preHandler'
 
-export type Handler<S extends RouteSchema> = FastifyRouteHandler<
+export type Handler<S extends RouteSchema = never> = FastifyRouteHandler<
   RouteSchemaInterface<S>,
   RawServerDefault,
   RawRequestDefaultExpression<RawServerDefault>,
   RawReplyDefaultExpression<RawServerDefault>
 >
 
-export interface Route<S extends RouteSchema = RouteSchema> {
+export interface Route {
   url: string
   method: HTTPMethods
-  schema?: S
+  schema?: RouteSchema
   middlewareTrigger?: MiddlewareTrigger
-  middlewares?: Middleware<S>[]
-  handler: Handler<S>
+  middlewares?: Middleware[]
+  handler: Handler
 }
 
 export interface MethodRoute<S extends RouteSchema> {
   schema?: S
   middlewareTrigger?: MiddlewareTrigger
-  middlewares?: Middleware<S>[]
+  middlewares?: Middleware[]
   handler: Handler<S>
 }
 
@@ -70,6 +70,7 @@ export class Router {
       schema,
       middlewareTrigger,
       middlewares,
+      // @ts-ignore
       handler,
     })
   }
