@@ -3,7 +3,7 @@ import Ajv from 'ajv'
 const extendAjv = (ajv: Ajv.Ajv) => {
   ajv.addFormat('boolean', {
     type: 'string',
-    validate: /^(true|false|0|1)$/,
+    validate: /^(true|false|0|1)$/i,
   })
 
   ajv.addFormat('number', {
