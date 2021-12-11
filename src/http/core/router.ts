@@ -1,5 +1,4 @@
 import {
-  FastifySchema,
   HTTPMethods,
   RawReplyDefaultExpression,
   RawRequestDefaultExpression,
@@ -7,40 +6,32 @@ import {
   RouteHandler as FastifyRouteHandler,
 } from 'fastify'
 import { resolvePaths } from '../../common/path'
-import { Static } from '../../common/schema'
 import { Middleware } from './middleware'
 import { usePlugin } from './plugin'
+import { RouteSchema, RouteSchemaInterface } from './schema'
 
-export type Schema = FastifySchema
-export type Maybe<T, P> = [T] extends [never] ? P : T
 export type MiddlewareTrigger = 'preValidation' | 'preHandler'
 
-export type Handler<S extends Schema = any> = FastifyRouteHandler<
-  {
-    Params: Maybe<Static<S['params']>, unknown>
-    Querystring: Maybe<Static<S['querystring']>, unknown>
-    Body: Maybe<Static<S['body']>, unknown>
-    Headers: Maybe<Static<S['headers']>, unknown>
-    Reply: Maybe<Static<S['response']>, unknown>
-  },
+export type Handler<S extends RouteSchema> = FastifyRouteHandler<
+  RouteSchemaInterface<S>,
   RawServerDefault,
   RawRequestDefaultExpression<RawServerDefault>,
   RawReplyDefaultExpression<RawServerDefault>
 >
 
-export interface Route {
+export interface Route<S extends RouteSchema = RouteSchema> {
   url: string
   method: HTTPMethods
-  schema?: Schema
-  middlewareTrigger?: MiddlewareTrigger
-  middlewares?: Middleware[]
-  handler: Handler<Schema>
-}
-
-export interface SchemaRoute<S extends Schema = any> {
   schema?: S
   middlewareTrigger?: MiddlewareTrigger
-  middlewares?: Middleware[]
+  middlewares?: Middleware<S>[]
+  handler: Handler<S>
+}
+
+export interface MethodRoute<S extends RouteSchema> {
+  schema?: S
+  middlewareTrigger?: MiddlewareTrigger
+  middlewares?: Middleware<S>[]
   handler: Handler<S>
 }
 
@@ -66,10 +57,10 @@ export class Router {
     this.used = []
   }
 
-  add<S extends Schema>(
+  add<S extends RouteSchema>(
     method: HTTPMethods,
     path: string,
-    route: SchemaRoute<S>,
+    route: MethodRoute<S>,
   ) {
     const { schema, middlewareTrigger, middlewares, handler } = route
 
@@ -122,31 +113,31 @@ export class Router {
     this.used.push([prefix, router])
   }
 
-  get<S extends Schema>(path: string, route: SchemaRoute<S>) {
+  get<S extends RouteSchema>(path: string, route: MethodRoute<S>) {
     this.add('GET', path, route)
   }
 
-  post<S extends Schema>(path: string, route: SchemaRoute<S>) {
+  post<S extends RouteSchema>(path: string, route: MethodRoute<S>) {
     this.add('POST', path, route)
   }
 
-  put<S extends Schema>(path: string, route: SchemaRoute<S>) {
+  put<S extends RouteSchema>(path: string, route: MethodRoute<S>) {
     this.add('PUT', path, route)
   }
 
-  patch<S extends Schema>(path: string, route: SchemaRoute<S>) {
+  patch<S extends RouteSchema>(path: string, route: MethodRoute<S>) {
     this.add('PATCH', path, route)
   }
 
-  delete<S extends Schema>(path: string, route: SchemaRoute<S>) {
+  delete<S extends RouteSchema>(path: string, route: MethodRoute<S>) {
     this.add('DELETE', path, route)
   }
 
-  head<S extends Schema>(path: string, route: SchemaRoute<S>) {
+  head<S extends RouteSchema>(path: string, route: MethodRoute<S>) {
     this.add('HEAD', path, route)
   }
 
-  options<S extends Schema>(path: string, route: SchemaRoute<S>) {
+  options<S extends RouteSchema>(path: string, route: MethodRoute<S>) {
     this.add('OPTIONS', path, route)
   }
 }

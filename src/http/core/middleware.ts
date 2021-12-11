@@ -1,8 +1,10 @@
 import { RouteHandler } from 'fastify'
-import { RouteGenericInterface } from 'fastify/types/route'
+import { RouteSchema, RouteSchemaInterface } from './schema'
 
-export type Middleware<T extends RouteGenericInterface = any> = RouteHandler<T>
+export type Middleware<S extends RouteSchema = RouteSchema> = RouteHandler<
+  RouteSchemaInterface<S>
+>
 
-export const useMiddleware = <T extends RouteGenericInterface = any>(
-  middleware: Middleware<T>,
+export const useMiddleware = <S extends RouteSchema = RouteSchema>(
+  middleware: Middleware<S>,
 ) => middleware

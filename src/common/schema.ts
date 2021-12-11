@@ -211,31 +211,8 @@ export type TAny = { kind: typeof AnyKind } & CustomOptions
 // Schema Extended
 // ------------------------------------------------------------------------
 
-export const ConstructorKind = Symbol('ConstructorKind')
-export const FunctionKind = Symbol('FunctionKind')
-export const PromiseKind = Symbol('PromiseKind')
 export const UndefinedKind = Symbol('UndefinedKind')
 export const VoidKind = Symbol('VoidKind')
-
-export type TConstructor<T extends TSchema[], U extends TSchema> = {
-  kind: typeof ConstructorKind
-  type: 'constructor'
-  arguments: readonly [...T]
-  returns: U
-} & CustomOptions
-
-export type TFunction<T extends TSchema[], U extends TSchema> = {
-  kind: typeof FunctionKind
-  type: 'function'
-  arguments: readonly [...T]
-  returns: U
-} & CustomOptions
-
-export type TPromise<T extends TSchema> = {
-  kind: typeof PromiseKind
-  type: 'promise'
-  item: T
-} & CustomOptions
 
 export type TUndefined = {
   kind: typeof UndefinedKind
@@ -265,9 +242,6 @@ export type TSchema =
   | TNull
   | TUnknown
   | TAny
-  | TConstructor<any[], any>
-  | TFunction<any[], any>
-  | TPromise<any>
   | TUndefined
   | TVoid
 
@@ -372,28 +346,6 @@ export type StaticRecord<
 export type StaticArray<T extends TSchema> = Array<Static<T>>
 export type StaticLiteral<T extends TValue> = T
 
-// TODO: disabled the part for Typescript 4.5
-//
-// export type StaticConstructor<
-//   T extends readonly TSchema[],
-//   U extends TSchema,
-// > = new (...args: [...{ [K in keyof T]: Static<T[K]> }]) => Static<U>
-
-// export type StaticFunction<T extends readonly TSchema[], U extends TSchema> = (
-//   ...args: [...{ [K in keyof T]: Static<T[K]> }]
-// ) => Static<U>
-
-export type StaticConstructor<
-  _T extends readonly TSchema[],
-  U extends TSchema,
-> = new (...args: unknown[]) => Static<U>
-
-export type StaticFunction<_T extends readonly TSchema[], U extends TSchema> = (
-  ...args: unknown[]
-) => Static<U>
-
-export type StaticPromise<T extends TSchema> = Promise<Static<T>>
-
 export type Static<T> = T extends TKeyOf<infer U>
   ? StaticKeyOf<U>
   : T extends TIntersect<infer U>
@@ -426,10 +378,6 @@ export type Static<T> = T extends TKeyOf<infer U>
   ? unknown
   : T extends TAny
   ? any
-  : T extends TFunction<infer U, infer R>
-  ? StaticFunction<U, R>
-  : T extends TPromise<infer U>
-  ? StaticPromise<U>
   : T extends TUndefined
   ? undefined
   : T extends TVoid
@@ -678,10 +626,7 @@ export class TypeBuilder {
     schema: T,
     options: ObjectOptions = {},
   ): TObject<TRequired<T['properties']>> {
-    const next = {
-      ...clone(schema),
-      ...options,
-    }
+    const next = { ...clone(schema), ...options }
 
     next.required = Object.keys(next.properties)
 
@@ -712,10 +657,7 @@ export class TypeBuilder {
     schema: T,
     options: ObjectOptions = {},
   ): TObject<TPartial<T['properties']>> {
-    const next = {
-      ...clone(schema),
-      ...options,
-    }
+    const next = { ...clone(schema), ...options }
 
     delete next.required
 
@@ -750,10 +692,7 @@ export class TypeBuilder {
     keys: [...K],
     options: ObjectOptions = {},
   ): TObject<Pick<T['properties'], K[number]>> {
-    const next = {
-      ...clone(schema),
-      ...options,
-    }
+    const next = { ...clone(schema), ...options }
 
     next.required = next.required
       ? next.required.filter((key: string) => keys.includes(key))
@@ -777,10 +716,7 @@ export class TypeBuilder {
     keys: [...K],
     options: ObjectOptions = {},
   ): TObject<Omit<T['properties'], K[number]>> {
-    const next = {
-      ...clone(schema),
-      ...options,
-    }
+    const next = { ...clone(schema), ...options }
 
     next.required = next.required
       ? next.required.filter((key: string) => !keys.includes(key))
@@ -798,44 +734,6 @@ export class TypeBuilder {
   /** `STANDARD` Omits the `kind` and `modifier` properties from the given schema. */
   Strict<T extends TSchema>(schema: T, options: CustomOptions = {}): T {
     return JSON.parse(JSON.stringify({ ...options, ...schema })) as T
-  }
-
-  /** `EXTENDED` Creates a `constructor` schema. */
-  Constructor<T extends TSchema[], U extends TSchema>(
-    args: [...T],
-    returns: U,
-    options: CustomOptions = {},
-  ): TConstructor<T, U> {
-    return {
-      ...options,
-      kind: ConstructorKind,
-      type: 'constructor',
-      arguments: args,
-      returns,
-    }
-  }
-
-  /** `EXTENDED` Creates a `function` schema. */
-  Function<T extends TSchema[], U extends TSchema>(
-    args: [...T],
-    returns: U,
-    options: CustomOptions = {},
-  ): TFunction<T, U> {
-    return {
-      ...options,
-      kind: FunctionKind,
-      type: 'function',
-      arguments: args,
-      returns,
-    }
-  }
-
-  /** `EXTENDED` Creates a `Promise<T>` schema. */
-  Promise<T extends TSchema>(
-    item: T,
-    options: CustomOptions = {},
-  ): TPromise<T> {
-    return { ...options, type: 'promise', kind: PromiseKind, item }
   }
 
   /** `EXTENDED` Creates a `undefined` schema. */
@@ -873,7 +771,7 @@ export class TypeBuilder {
     return { ...options, kind: NamespaceKind, definitions }
   }
 
-  /** `EXPERIMENTAL` References a schema inside a box. The referenced box must specify an `$id`. */
+  /** `EXPERIMENTAL` References a schema inside a namespace. The referenced namespace must specify an `$id`. */
   Ref<T extends TNamespace<TDefinitions>, K extends keyof T['definitions']>(
     namespace: T,
     key: K,
