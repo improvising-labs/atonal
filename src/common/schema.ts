@@ -374,6 +374,7 @@ export type StaticLiteral<T extends TValue> = T
 export type StaticConstructor<
   T extends readonly TSchema[],
   U extends TSchema,
+  // @ts-ignore
 > = new (...args: [...{ [K in keyof T]: Static<T[K]> }]) => Static<U>
 
 export type StaticFunction<T extends readonly TSchema[], U extends TSchema> = (
