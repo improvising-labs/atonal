@@ -27,7 +27,7 @@ export type TReadonly<T extends TSchema> = T & {
 // Schema Standard
 // ------------------------------------------------------------------------
 
-export const BoxKind = Symbol('BoxKind')
+export const NamespaceKind = Symbol('NamespaceKind')
 export const KeyOfKind = Symbol('KeyOfKind')
 export const IntersectKind = Symbol('IntersectKind')
 export const UnionKind = Symbol('UnionKind')
@@ -123,8 +123,8 @@ export type TEnumKey<T = TKey> = { type: 'number' | 'string'; const: T }
 
 export type TDefinitions = { [key: string]: TSchema }
 export type TProperties = { [key: string]: TSchema }
-export type TBox<T extends TDefinitions> = {
-  kind: typeof BoxKind
+export type TNamespace<T extends TDefinitions> = {
+  kind: typeof NamespaceKind
   definitions: T
 } & CustomOptions
 
@@ -371,13 +371,25 @@ export type StaticRecord<
 
 export type StaticArray<T extends TSchema> = Array<Static<T>>
 export type StaticLiteral<T extends TValue> = T
-export type StaticConstructor<
-  T extends readonly TSchema[],
-  U extends TSchema,
-> = new (...args: [...{ [K in keyof T]: Static<T[K]> }]) => Static<U>
 
-export type StaticFunction<T extends readonly TSchema[], U extends TSchema> = (
-  ...args: [...{ [K in keyof T]: Static<T[K]> }]
+// TODO: disabled the part for Typescript 4.5
+//
+// export type StaticConstructor<
+//   T extends readonly TSchema[],
+//   U extends TSchema,
+// > = new (...args: [...{ [K in keyof T]: Static<T[K]> }]) => Static<U>
+
+// export type StaticFunction<T extends readonly TSchema[], U extends TSchema> = (
+//   ...args: [...{ [K in keyof T]: Static<T[K]> }]
+// ) => Static<U>
+
+export type StaticConstructor<
+  _T extends readonly TSchema[],
+  U extends TSchema,
+> = new (...args: unknown[]) => Static<U>
+
+export type StaticFunction<_T extends readonly TSchema[], U extends TSchema> = (
+  ...args: unknown[]
 ) => Static<U>
 
 export type StaticPromise<T extends TSchema> = Promise<Static<T>>
@@ -479,6 +491,7 @@ export class TypeBuilder {
     const additionalItems = false
     const minItems = items.length
     const maxItems = items.length
+
     return {
       ...options,
       kind: TupleKind,
@@ -498,16 +511,20 @@ export class TypeBuilder {
     const property_names = Object.keys(properties)
     const optional = property_names.filter(name => {
       const candidate = properties[name] as TModifier
+
       return (
         candidate.modifier &&
         (candidate.modifier === OptionalModifier ||
           candidate.modifier === ReadonlyOptionalModifier)
       )
     })
+
     const required_names = property_names.filter(
       name => !optional.includes(name),
     )
+
     const required = required_names.length > 0 ? required_names : undefined
+
     return required
       ? { ...options, kind: ObjectKind, type: 'object', properties, required }
       : { ...options, kind: ObjectKind, type: 'object', properties }
@@ -550,11 +567,13 @@ export class TypeBuilder {
     const values = Object.keys(item)
       .filter(key => isNaN(key as any))
       .map(key => item[key]) as T[keyof T][]
+
     const anyOf = values.map(value =>
       typeof value === 'string'
         ? { type: 'string' as const, const: value }
         : { type: 'number' as const, const: value },
     )
+
     return { ...options, kind: EnumKind, anyOf }
   }
 
@@ -645,6 +664,7 @@ export class TypeBuilder {
         : key.pattern
         ? key.pattern
         : '^.*$'
+
     return {
       ...options,
       kind: RecordKind,
@@ -658,10 +678,16 @@ export class TypeBuilder {
     schema: T,
     options: ObjectOptions = {},
   ): TObject<TRequired<T['properties']>> {
-    const next = { ...clone(schema), ...options }
+    const next = {
+      ...clone(schema),
+      ...options,
+    }
+
     next.required = Object.keys(next.properties)
+
     for (const key of Object.keys(next.properties)) {
       const property = next.properties[key]
+
       switch (property.modifier) {
         case ReadonlyOptionalModifier:
           property.modifier = ReadonlyModifier
@@ -677,6 +703,7 @@ export class TypeBuilder {
           break
       }
     }
+
     return next
   }
 
@@ -685,10 +712,16 @@ export class TypeBuilder {
     schema: T,
     options: ObjectOptions = {},
   ): TObject<TPartial<T['properties']>> {
-    const next = { ...clone(schema), ...options }
+    const next = {
+      ...clone(schema),
+      ...options,
+    }
+
     delete next.required
+
     for (const key of Object.keys(next.properties)) {
       const property = next.properties[key]
+
       switch (property.modifier) {
         case ReadonlyOptionalModifier:
           property.modifier = ReadonlyOptionalModifier
@@ -704,6 +737,7 @@ export class TypeBuilder {
           break
       }
     }
+
     return next
   }
 
@@ -716,13 +750,21 @@ export class TypeBuilder {
     keys: [...K],
     options: ObjectOptions = {},
   ): TObject<Pick<T['properties'], K[number]>> {
-    const next = { ...clone(schema), ...options }
+    const next = {
+      ...clone(schema),
+      ...options,
+    }
+
     next.required = next.required
       ? next.required.filter((key: string) => keys.includes(key))
       : undefined
+
     for (const key of Object.keys(next.properties)) {
-      if (!keys.includes(key)) delete next.properties[key]
+      if (!keys.includes(key)) {
+        delete next.properties[key]
+      }
     }
+
     return next
   }
 
@@ -735,13 +777,21 @@ export class TypeBuilder {
     keys: [...K],
     options: ObjectOptions = {},
   ): TObject<Omit<T['properties'], K[number]>> {
-    const next = { ...clone(schema), ...options }
+    const next = {
+      ...clone(schema),
+      ...options,
+    }
+
     next.required = next.required
       ? next.required.filter((key: string) => !keys.includes(key))
       : undefined
+
     for (const key of Object.keys(next.properties)) {
-      if (keys.includes(key)) delete next.properties[key]
+      if (keys.includes(key)) {
+        delete next.properties[key]
+      }
     }
+
     return next
   }
 
@@ -801,6 +851,7 @@ export class TypeBuilder {
   /** `EXPERIMENTAL` Creates a recursive type. */
   Rec<T extends TSchema>($id: string, callback: (self: TAny) => T): T {
     const self = callback({ $ref: `${$id}#/definitions/self` } as any)
+
     return {
       $id,
       $ref: `${$id}#/definitions/self`,
@@ -815,16 +866,16 @@ export class TypeBuilder {
   // }
 
   /** `EXPERIMENTAL` Creates a container for schema definitions. */
-  Box<T extends TDefinitions>(
+  Namespace<T extends TDefinitions>(
     definitions: T,
     options: CustomOptions = {},
-  ): TBox<T> {
-    return { ...options, kind: BoxKind, definitions }
+  ): TNamespace<T> {
+    return { ...options, kind: NamespaceKind, definitions }
   }
 
   /** `EXPERIMENTAL` References a schema inside a box. The referenced box must specify an `$id`. */
-  Ref<T extends TBox<TDefinitions>, K extends keyof T['definitions']>(
-    box: T,
+  Ref<T extends TNamespace<TDefinitions>, K extends keyof T['definitions']>(
+    namespace: T,
     key: K,
   ): T['definitions'][K]
 
@@ -835,6 +886,7 @@ export class TypeBuilder {
   Ref(...args: any[]): any {
     const $id = args[0]['$id'] || ('' as string)
     const key = args[1] as string
+
     return args.length === 2
       ? { $ref: `${$id}#/definitions/${key}` }
       : { $ref: $id }
