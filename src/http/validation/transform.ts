@@ -25,7 +25,7 @@ export const transform = <
   const result: any = {}
 
   for (const [key, fn] of Object.entries(mapping)) {
-    if (source.hasOwnProperty(key)) {
+    if (source[key] !== undefined) {
       if (typeof fn === 'function') {
         result[key] = fn(source[key])
       } else {
