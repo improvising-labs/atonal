@@ -19,17 +19,20 @@ export type Handler<S extends RouteSchema = RouteSchema> = FastifyRouteHandler<
   RawReplyDefaultExpression<RawServerDefault>
 >
 
+export type LazyCallback<T> = () => T
+export type LazyCallbackOr<T> = LazyCallback<T> | T
+
 export interface Route {
   url: string
   method: HTTPMethods
-  schema?: RouteSchema
+  schema?: LazyCallbackOr<RouteSchema>
   middlewareTrigger?: MiddlewareTrigger
   middlewares?: Middleware[]
   handler: Handler
 }
 
-export interface MethodRoute<S extends RouteSchema> {
-  schema?: S
+export type MethodRoute<S extends RouteSchema> = {
+  schema?: LazyCallbackOr<S>
   middlewareTrigger?: MiddlewareTrigger
   middlewares?: Middleware[]
   handler: Handler<S>
@@ -70,7 +73,6 @@ export class Router {
       schema,
       middlewareTrigger,
       middlewares,
-      // @ts-ignore
       handler,
     })
   }
@@ -93,7 +95,7 @@ export class Router {
         instance.route({
           url,
           method,
-          schema,
+          schema: typeof schema === 'function' ? schema() : schema,
           [middlewareTrigger]: [...currentMiddlewares, ...middlewares],
           handler,
         })
