@@ -9,5 +9,5 @@ export type RouteSchemaInterface<S extends RouteSchema> = {
   Querystring: Maybe<Static<S['querystring']>, unknown>
   Body: Maybe<Static<S['body']>, unknown>
   Headers: Maybe<Static<S['headers']>, unknown>
-  Reply: Maybe<Static<S['response']>, unknown>
+  Reply: unknown
 }
