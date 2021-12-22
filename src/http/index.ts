@@ -20,7 +20,7 @@ export interface AtonalConfig extends Omit<FastifyServerOptions, 'ajv'> {
   cookie?: CookieOptions
 }
 
-export interface AtonalUseFn<T = void> {
+export interface AtonalUseFn<T = ReturnType<FastifyInstance['register']>> {
   <Options extends PluginOptions>(
     plugin: Plugin<Options>,
     opts?: PluginRegisterOptions<Options>,
@@ -87,9 +87,9 @@ export const useAtonal = ({
     opts?: PluginRegisterOptions<PluginOptions | RouterRegisterOptions>,
   ) => {
     if (obj instanceof Router) {
-      fast.register(obj.compile(), opts)
+      return fast.register(obj.compile(), opts)
     } else {
-      fast.register(obj, opts)
+      return fast.register(obj, opts)
     }
   }
 
