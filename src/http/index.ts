@@ -6,7 +6,11 @@ import { Router, RouterRegisterOptions } from './core/router'
 import extendAjv from './validation/ajv'
 
 declare module 'fastify' {
-  interface RequestState {}
+  interface RequestState {
+    authed?: boolean
+    clientId?: string
+  }
+
   interface FastifyRequest {
     state: RequestState
   }

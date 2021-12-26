@@ -1,6 +1,6 @@
 {
   "name": "atonal",
-  "version": "1.0.25",
+  "version": "1.0.26",
   "description": "The most straight-forward Fastify-based web framework",
   "main": "dist/index.js",
   "author": "Improvising Rhythm Ltd.",
