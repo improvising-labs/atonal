@@ -1,5 +1,5 @@
 import {
-  preHandlerAsyncHookHandler,
+  onRequestAsyncHookHandler,
   RawReplyDefaultExpression,
   RawRequestDefaultExpression,
   RawServerDefault,
@@ -7,7 +7,7 @@ import {
 import { RouteSchema, RouteSchemaInterface } from './schema'
 
 export type Middleware<S extends RouteSchema = RouteSchema> =
-  preHandlerAsyncHookHandler<
+  onRequestAsyncHookHandler<
     RawServerDefault,
     RawRequestDefaultExpression<RawServerDefault>,
     RawReplyDefaultExpression<RawServerDefault>,
