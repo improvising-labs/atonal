@@ -12,4 +12,7 @@ export type Plugin<T extends PluginOptions = PluginOptions> =
 
 export const usePlugin = <T extends PluginOptions = PluginOptions>(
   plugin: Plugin<T>,
-) => plugin
+) => {
+  ;(plugin as any)[Symbol.for('skip-override')] = true
+  return plugin
+}
