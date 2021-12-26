@@ -15,8 +15,8 @@ export const usePlugin = <T extends PluginOptions = PluginOptions>(
 ) => plugin
 
 export const useGlobalPlugin = <T extends PluginOptions = PluginOptions>(
-  globalPlugin: Plugin<T> & { [key: symbol]: any },
+  globalPlugin: Plugin<T>,
 ) => {
-  globalPlugin[Symbol.for('skip-override')] = true
+  ;(globalPlugin as any)[Symbol.for('skip-override')] = true
   return globalPlugin
 }
