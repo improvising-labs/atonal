@@ -15,5 +15,8 @@ export const md5 = (
   encoding: BinaryToTextEncoding = 'hex',
 ) => createHash('md5').update(str).digest(encoding)
 
-export const hashPassword = (str: string, salt = '') =>
-  sha256(str + salt, 'base64')
+export const hashPassword = (password: string, salt = '') =>
+  sha256(password + salt, 'base64')
+
+export const comparePassword = (salt: string, hash: string, password: string) =>
+  hashPassword(password + salt) === hash
