@@ -7,8 +7,9 @@ import extendAjv from './validation/ajv'
 
 declare module 'fastify' {
   interface RequestState {
-    authed?: boolean
     clientId?: string
+    authed?: boolean
+    bypassRateLimit?: boolean
   }
 
   interface FastifyRequest {

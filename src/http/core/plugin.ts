@@ -4,6 +4,11 @@ import {
   FastifyRegisterOptions,
 } from 'fastify'
 
+export interface PluginMeta {
+  description?: string
+  global?: boolean
+}
+
 export type PluginRegisterOptions<Options> = FastifyRegisterOptions<Options>
 export type PluginOptions = Record<string, any>
 export type Plugin<T extends PluginOptions = PluginOptions> =
@@ -12,11 +17,17 @@ export type Plugin<T extends PluginOptions = PluginOptions> =
 
 export const usePlugin = <T extends PluginOptions = PluginOptions>(
   plugin: Plugin<T>,
-) => plugin
-
-export const useGlobalPlugin = <T extends PluginOptions = PluginOptions>(
-  globalPlugin: Plugin<T>,
+  meta: PluginMeta = {},
 ) => {
-  ;(globalPlugin as any)[Symbol.for('skip-override')] = true
-  return globalPlugin
+  if (meta.description) {
+    Object.assign(plugin, { name: meta.description })
+  }
+
+  if (meta.global) {
+    Object.assign(plugin, {
+      [Symbol.for('skip-override')]: true,
+    })
+  }
+
+  return plugin
 }

@@ -16,6 +16,10 @@ export interface RateLimitOptions {
 
 export const useRateLimit = ({ timeWindow, maxRequests }: RateLimitOptions) => {
   return useMiddleware(async req => {
+    if (req.state.bypassRateLimit) {
+      return
+    }
+
     const { routerPath, routerMethod } = req
 
     const key = req.state.clientId ?? req.ip

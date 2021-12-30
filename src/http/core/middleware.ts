@@ -6,6 +6,12 @@ import {
 } from 'fastify'
 import { RouteSchema, RouteSchemaInterface } from './schema'
 
+export type MiddlewareExecutionTrigger = 'preValidation' | 'preHandler'
+
+export interface MiddlewareMeta {
+  description?: string
+}
+
 export type Middleware<S extends RouteSchema = RouteSchema> =
   onRequestAsyncHookHandler<
     RawServerDefault,
@@ -16,4 +22,11 @@ export type Middleware<S extends RouteSchema = RouteSchema> =
 
 export const useMiddleware = <S extends RouteSchema = RouteSchema>(
   middleware: Middleware<S>,
-) => middleware
+  meta: MiddlewareMeta = {},
+) => {
+  if (meta.description) {
+    Object.assign(middleware, { description: meta.description })
+  }
+
+  return middleware
+}
