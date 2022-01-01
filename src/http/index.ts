@@ -17,6 +17,8 @@ declare module 'fastify' {
   }
 }
 
+export { FastifyRequest as Request, FastifyReply as Response } from 'fastify'
+
 export type CorsOptions = FastifyCorsOptions | boolean
 export type CookieOptions = FastifyCookieOptions | boolean
 
