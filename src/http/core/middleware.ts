@@ -30,3 +30,13 @@ export const useMiddleware = <S extends RouteSchema = RouteSchema>(
 
   return middleware
 }
+
+export const useNullableMiddleware = <S extends RouteSchema = RouteSchema>(
+  middleware?: Middleware<S>,
+) => {
+  if (!middleware) {
+    return async () => {}
+  }
+
+  return useMiddleware(middleware)
+}
