@@ -40,3 +40,11 @@ export const useNullableMiddleware = <S extends RouteSchema = RouteSchema>(
 
   return useMiddleware(middleware)
 }
+
+export const useLazyMiddleware = <S extends RouteSchema = RouteSchema>(
+  builder: () => Middleware<S> | undefined,
+) => {
+  return useMiddleware(async function (req, res) {
+    await builder()?.call(this, req, res)
+  })
+}
