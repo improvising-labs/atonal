@@ -22,14 +22,16 @@ export const transform = <
   source: S,
   mapping: T,
 ) => {
-  const result: any = {}
+  const result: Record<string, unknown> = {}
 
-  for (const [key, fn] of Object.entries(mapping)) {
-    if (source[key] !== undefined) {
-      if (typeof fn === 'function') {
-        result[key] = fn(source[key])
+  for (const [key, value] of Object.entries(source)) {
+    if (value !== undefined) {
+      const fn = mapping[key]
+
+      if (fn) {
+        result[key] = fn(value as NonNullable<S[string]>)
       } else {
-        result[key] = source[key]
+        result[key] = value
       }
     }
   }
