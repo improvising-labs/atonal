@@ -454,7 +454,7 @@ export class TypeBuilder {
   /** `STANDARD` Creates a `object` schema with the given properties. */
   Object<T extends TProperties>(
     properties: T,
-    options: ObjectOptions = {},
+    { additionalProperties = false, ...options }: ObjectOptions = {},
   ): TObject<T> {
     const property_names = Object.keys(properties)
     const optional = property_names.filter(name => {
@@ -474,8 +474,21 @@ export class TypeBuilder {
     const required = required_names.length > 0 ? required_names : undefined
 
     return required
-      ? { ...options, kind: ObjectKind, type: 'object', properties, required }
-      : { ...options, kind: ObjectKind, type: 'object', properties }
+      ? {
+          ...options,
+          kind: ObjectKind,
+          type: 'object',
+          properties,
+          required,
+          additionalProperties,
+        }
+      : {
+          ...options,
+          kind: ObjectKind,
+          type: 'object',
+          properties,
+          additionalProperties,
+        }
   }
 
   /** `STANDARD` Creates an intersection schema. Note this function requires draft `2019-09` to constrain with `unevaluatedProperties`. */
