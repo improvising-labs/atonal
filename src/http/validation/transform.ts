@@ -38,3 +38,39 @@ export const transform = <
 
   return result as TypeTransformed<S, T>
 }
+
+export class StringCast {
+  static number(str: string): number
+  static number(str?: string): number | undefined
+  static number(str?: string) {
+    if (str === undefined || str === null) {
+      return undefined
+    }
+
+    return Number(str)
+  }
+
+  static boolean(str: string): boolean
+  static boolean(str?: string): boolean | undefined
+  static boolean(str?: string) {
+    if (str === undefined || str === null) {
+      return undefined
+    }
+
+    if (str === 'false' || str === 'False' || str === '0') {
+      return false
+    }
+
+    return true
+  }
+
+  static date(str: string): Date
+  static date(str?: string): Date | undefined
+  static date(str?: string) {
+    if (str === undefined || str === null) {
+      return undefined
+    }
+
+    return new Date(str)
+  }
+}

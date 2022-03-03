@@ -456,8 +456,8 @@ export class TypeBuilder {
     properties: T,
     { additionalProperties = false, ...options }: ObjectOptions = {},
   ): TObject<T> {
-    const property_names = Object.keys(properties)
-    const optional = property_names.filter(name => {
+    const propertyNames = Object.keys(properties)
+    const optional = propertyNames.filter(name => {
       const candidate = properties[name] as TModifier
 
       return (
@@ -467,28 +467,16 @@ export class TypeBuilder {
       )
     })
 
-    const required_names = property_names.filter(
-      name => !optional.includes(name),
-    )
+    const requiredNames = propertyNames.filter(name => !optional.includes(name))
 
-    const required = required_names.length > 0 ? required_names : undefined
-
-    return required
-      ? {
-          ...options,
-          kind: ObjectKind,
-          type: 'object',
-          properties,
-          required,
-          additionalProperties,
-        }
-      : {
-          ...options,
-          kind: ObjectKind,
-          type: 'object',
-          properties,
-          additionalProperties,
-        }
+    return {
+      kind: ObjectKind,
+      type: 'object',
+      properties,
+      additionalProperties,
+      ...options,
+      ...(requiredNames.length > 0 && { required: requiredNames }),
+    }
   }
 
   /** `STANDARD` Creates an intersection schema. Note this function requires draft `2019-09` to constrain with `unevaluatedProperties`. */
