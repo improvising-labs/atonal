@@ -1,9 +1,9 @@
-export type TypeMapping<S extends Record<string, unknown>> = {
+export type TypeMapping<S extends Record<string, any>> = {
   [key in keyof S]?: (x: NonNullable<S[key]>) => unknown
 }
 
 export type TypeTransformed<
-  S extends Record<string, unknown>,
+  S extends Record<string, any>,
   T extends TypeMapping<S>,
 > = {
   [key in keyof S]: T[key] extends (x: NonNullable<S[key]>) => unknown
@@ -16,13 +16,13 @@ export type TypeTransformed<
 }
 
 export const transform = <
-  S extends Record<string, unknown>,
+  S extends Record<string, any>,
   T extends TypeMapping<S>,
 >(
   source: S,
   mapping: T,
 ) => {
-  const result: Record<string, unknown> = {}
+  const result: Record<string, any> = {}
 
   for (const [key, value] of Object.entries(source)) {
     if (value !== undefined) {
